@@ -4,6 +4,8 @@
 
 Rust + Tauri 2，macOS / Windows 双端；核心逻辑在 `agenthub-core`，GUI 与 CLI 都是它的薄壳。
 
+**软件主页：[agenthub.yogo.wang](https://agenthub.yogo.wang)** · [下载安装](#下载安装) · [从源码构建](docs/build.md) · [变更记录](CHANGELOG.md) · [漏洞报告](SECURITY.md)
+
 ![总览](docs/screenshots/light-dashboard.png)
 
 | 暗色 | 亮色 |
