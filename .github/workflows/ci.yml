@@ -3,6 +3,14 @@ name: ci
 on:
   push:
   pull_request:
+  # 计费策略：私有仓的 Actions 分钟计入免费额度，public 仓库不计费。
+  # 所以自动触发只在公开仓生效；维护者的私有开发仓需要在 Actions 页面手动 Run workflow。
+  workflow_dispatch:
+    inputs:
+      bundle:
+        description: 同时跑双平台打包冒烟（约 10 分钟，会计费）
+        type: boolean
+        default: false
 
 # 默认只读；出包作业单独提权
 permissions:
@@ -11,6 +19,9 @@ permissions:
 jobs:
   check:
     name: check (${{ matrix.os }})
+    # 只在公开仓自动跑；开发仓只有手动 dispatch 才跑（省私有仓额度）。
+    # 开发仓 push 仍会留下一条「全部跳过」的运行记录，但不消耗分钟。
+    if: github.event_name == 'workflow_dispatch' || github.repository == 't3nc/AgentHub'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -69,7 +80,10 @@ jobs:
   bundle:
     name: bundle (${{ matrix.os }})
     needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # 公开仓 main push 自动跑；开发仓要跑得手动 dispatch 并勾上 bundle
+    if: >
+      (github.repository == 't3nc/AgentHub' && github.event_name == 'push' && github.ref == 'refs/heads/main')
+      || (github.event_name == 'workflow_dispatch' && inputs.bundle)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
