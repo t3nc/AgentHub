@@ -1,0 +1,808 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------
+   终端兜底字体：JetBrains Mono 的 Nerd Font Mono 变体（图标单格宽）。
+   oh-my-posh 一类提示符会吐私有区图标，系统没装 Nerd Font 时这些字形
+   只能画方块；这里自带一份保证换机器也能看。
+   - 只在真正用到图标字符时才下载，不进主 chunk；
+   - weight/italic 都声明成同一面，避免粗体回退到不含图标的字体；
+   - 不含 CJK，中文靠 font-family 列表末尾的系统字体逐字回退。
+   --------------------------------------------------------------- */
+@font-face {
+  font-family: "AgentHub Nerd Mono";
+  src: url("./assets/fonts/AgentHubNerdMono.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------------------------------------------------------------
+   主题令牌：所有颜色都走 CSS 变量，换肤只换 html[data-theme]。
+
+   - `data-theme` = 当前生效主题的 id（github-dark / dracula / ayu-light …），
+     由 lib/theme.tsx 与 index.html 的首帧脚本写入，是调色板的唯一真源；
+   - `.dark` 不再承载色值，只负责 Tailwind 的 dark: 变体与原生控件配色，
+     并且保证 `color-scheme` 与当前调色板的明暗一致；
+   - 每套主题都定义了同一组语义令牌，组件里只写 bg-ink-950 / text-text-strong
+     这类名字，因此不存在「某个主题少一个令牌」的破图。
+
+   视觉方向：本地 Agent 编排台。层级始终是「画布最底 → 面板 → 浮层」，
+   导航栏按主题自身的面板色系推导（亮色主题即浅侧栏 + 深字），
+   强调色取主题签名色，--brand-300 恒为可在当前背景上阅读的文字色。
+   变量值是 RGB 三元组，Tailwind 用 rgb(var(--x) / <alpha-value>) 映射。
+   --------------------------------------------------------------- */
+@layer base {
+  /* 兜底 = GitHub Light：首帧脚本还没跑起来（或 localStorage 被清）也不会白屏乱色 */
+  :root {
+    color-scheme: light;
+
+    --bg: 255 255 255;
+    --bg-elev: 255 255 255;
+    --bg-elev-2: 246 248 250;
+    --bg-sunken: 246 248 250;
+
+    --surface-2: 246 248 250;
+    --surface-hover: 234 238 242;
+    --surface-active: 221 227 234;
+
+    --line: 208 215 222;
+    --line-strong: 175 184 193;
+
+    --fg-strong: 31 35 40;
+    --fg-muted: 89 99 110;
+    --fg-dim: 110 119 129;
+
+    --brand-500: 9 105 218;
+    --brand-400: 33 139 255;
+    --brand-300: 5 80 174;
+    /* 实心强调色按钮上的文字色：亮色主题的蓝底用白字，Orange 一类的亮底用深字 */
+    --on-brand: 255 255 255;
+
+    --ok: 26 127 55;
+    --warn: 154 103 0;
+    --danger: 207 34 46;
+    --info: 9 105 218;
+    --brass: 191 135 0;
+
+    --nav-bg: 246 248 250;
+    --nav-bg-2: 234 238 242;
+    --nav-fg: 31 35 40;
+    --nav-dim: 89 99 110;
+    --nav-active: 221 244 255;
+    --nav-line: 208 215 222;
+    --nav-accent: 9 105 218;
+
+    /* 画布 */
+    --grid-line: 234 238 242;
+    --node-bg: 255 255 255;
+
+    --shadow-panel: 0 1px 2px rgba(31, 35, 40, 0.05), 0 10px 28px -24px rgba(31, 35, 40, 0.35);
+    --shadow-drawer: -18px 0 48px -34px rgba(31, 35, 40, 0.32);
+    --shadow-glow: 0 0 0 1px rgba(9, 105, 218, 0.22);
+    --halo-1: rgba(9, 105, 218, 0.07);
+    --halo-2: rgba(191, 135, 0, 0.05);
+    /* 弹窗遮罩：只走明暗两档，10 套主题共用（遮罩太带色反而显脏） */
+    --scrim: 18 20 23;
+  }
+
+  /* 暗色兜底 = GitHub Dark。正常路径下 data-theme 一定会命中下面某个调色板块；
+     这里是给「首帧脚本还没跑 / localStorage 里是个不认识的 id」留的退路，
+     否则暗色模式会掉回 :root 的亮色令牌，闪一下白。 */
+  .dark {
+    color-scheme: dark;
+
+    --bg: 13 17 23;
+    --bg-elev: 22 27 34;
+    --bg-elev-2: 28 33 40;
+    --bg-sunken: 1 4 9;
+
+    --surface-2: 28 33 40;
+    --surface-hover: 33 38 45;
+    --surface-active: 45 51 59;
+
+    --line: 48 54 61;
+    --line-strong: 72 79 88;
+
+    --fg-strong: 230 237 243;
+    --fg-muted: 139 148 158;
+    --fg-dim: 110 118 129;
+
+    --brand-500: 31 111 235;
+    --brand-400: 47 129 247;
+    --brand-300: 121 192 255;
+    --on-brand: 255 255 255;
+
+    --ok: 63 185 80;
+    --warn: 210 153 34;
+    --danger: 248 81 73;
+    --info: 88 166 255;
+    --brass: 227 179 65;
+
+    --nav-bg: 1 4 9;
+    --nav-bg-2: 13 17 23;
+    --nav-fg: 230 237 243;
+    --nav-dim: 139 148 158;
+    --nav-active: 27 42 63;
+    --nav-line: 33 38 45;
+    --nav-accent: 47 129 247;
+
+    --grid-line: 33 38 45;
+    --node-bg: 22 27 34;
+
+    --shadow-panel: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -34px rgba(1, 4, 9, 0.9);
+    --shadow-drawer: -18px 0 48px -30px rgba(1, 4, 9, 0.9);
+    --shadow-glow: 0 0 0 1px rgba(47, 129, 247, 0.26);
+    --halo-1: rgba(47, 129, 247, 0.07);
+    --halo-2: rgba(227, 179, 65, 0.05);
+    --scrim: 0 0 0;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-text-strong font-sans antialiased;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    transition: background-color 220ms ease, color 220ms ease;
+  }
+
+  ::selection {
+    background: rgb(var(--brand-500) / 0.22);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--line-strong) / 0.85);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--brand-500) / 0.55);
+    background-clip: content-box;
+  }
+}
+
+/* ---------------------------------------------------------------
+   内置调色板。每块只覆盖颜色类令牌，布局零改动。
+   选择器用 `:root[data-theme=...]`（特异性 0,2,0），稳压 .dark 与 :root。
+   --------------------------------------------------------------- */
+
+/* ---------- 暗色 ---------- */
+
+:root[data-theme="github-dark"] {
+  color-scheme: dark;
+
+  --bg: 13 17 23;
+  --bg-elev: 22 27 34;
+  --bg-elev-2: 28 33 40;
+  --bg-sunken: 1 4 9;
+
+  --surface-2: 28 33 40;
+  --surface-hover: 33 38 45;
+  --surface-active: 45 51 59;
+
+  --line: 48 54 61;
+  --line-strong: 72 79 88;
+
+  --fg-strong: 230 237 243;
+  --fg-muted: 139 148 158;
+  --fg-dim: 110 118 129;
+
+  --brand-500: 31 111 235;
+  --brand-400: 47 129 247;
+  --brand-300: 121 192 255;
+  --on-brand: 255 255 255;
+
+  --ok: 63 185 80;
+  --warn: 210 153 34;
+  --danger: 248 81 73;
+  --info: 88 166 255;
+  --brass: 227 179 65;
+
+  --nav-bg: 1 4 9;
+  --nav-bg-2: 13 17 23;
+  --nav-fg: 230 237 243;
+  --nav-dim: 139 148 158;
+  --nav-active: 27 42 63;
+  --nav-line: 33 38 45;
+  --nav-accent: 47 129 247;
+
+  --grid-line: 33 38 45;
+  --node-bg: 22 27 34;
+
+  --shadow-panel: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -34px rgba(1, 4, 9, 0.9);
+  --shadow-drawer: -18px 0 48px -30px rgba(1, 4, 9, 0.9);
+  --shadow-glow: 0 0 0 1px rgba(47, 129, 247, 0.26);
+  --halo-1: rgba(47, 129, 247, 0.07);
+  --halo-2: rgba(227, 179, 65, 0.05);
+}
+
+:root[data-theme="one-dark-pro"] {
+  color-scheme: dark;
+
+  --bg: 40 44 52;
+  --bg-elev: 33 37 43;
+  --bg-elev-2: 44 49 58;
+  --bg-sunken: 27 31 36;
+
+  --surface-2: 44 49 58;
+  --surface-hover: 51 57 66;
+  --surface-active: 62 68 81;
+
+  --line: 62 68 81;
+  --line-strong: 75 82 99;
+
+  --fg-strong: 220 223 228;
+  --fg-muted: 157 165 180;
+  /* 官方注释色 #5C6370 在 10px 淡文字上只有 2.55:1，提亮到 3.6:1 */
+  --fg-dim: 107 119 135;
+
+  --brand-500: 97 175 239;
+  --brand-400: 127 193 245;
+  --brand-300: 156 203 247;
+  --on-brand: 27 31 36;
+
+  --ok: 152 195 121;
+  --warn: 229 192 123;
+  --danger: 224 108 117;
+  --info: 86 182 194;
+  --brass: 209 154 102;
+
+  --nav-bg: 33 37 43;
+  --nav-bg-2: 44 49 58;
+  --nav-fg: 220 223 228;
+  --nav-dim: 127 132 142;
+  --nav-active: 51 57 66;
+  --nav-line: 62 68 81;
+  --nav-accent: 97 175 239;
+
+  --grid-line: 51 57 66;
+  --node-bg: 33 37 43;
+
+  --shadow-panel: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -34px rgba(15, 17, 20, 0.9);
+  --shadow-drawer: -18px 0 48px -30px rgba(15, 17, 20, 0.9);
+  --shadow-glow: 0 0 0 1px rgba(97, 175, 239, 0.26);
+  --halo-1: rgba(97, 175, 239, 0.07);
+  --halo-2: rgba(209, 154, 102, 0.05);
+}
+
+:root[data-theme="dracula"] {
+  color-scheme: dark;
+
+  --bg: 40 42 54;
+  --bg-elev: 33 34 44;
+  --bg-elev-2: 52 55 70;
+  --bg-sunken: 25 26 33;
+
+  --surface-2: 52 55 70;
+  --surface-hover: 59 62 79;
+  --surface-active: 68 71 90;
+
+  --line: 68 71 90;
+  --line-strong: 98 114 164;
+
+  --fg-strong: 248 248 242;
+  --fg-muted: 185 188 205;
+  --fg-dim: 98 114 164;
+
+  --brand-500: 189 147 249;
+  --brand-400: 203 169 250;
+  --brand-300: 220 195 255;
+  --on-brand: 33 34 44;
+
+  --ok: 80 250 123;
+  --warn: 255 184 108;
+  --danger: 255 85 85;
+  --info: 139 233 253;
+  --brass: 241 250 140;
+
+  --nav-bg: 33 34 44;
+  --nav-bg-2: 40 42 54;
+  --nav-fg: 248 248 242;
+  /* 官方注释色 #6272A4 在导航底上 3.36:1，偏虚，提亮一档 */
+  --nav-dim: 112 128 178;
+  --nav-active: 52 55 70;
+  --nav-line: 68 71 90;
+  --nav-accent: 189 147 249;
+
+  --grid-line: 52 55 70;
+  --node-bg: 33 34 44;
+
+  --shadow-panel: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -34px rgba(15, 16, 21, 0.9);
+  --shadow-drawer: -18px 0 48px -30px rgba(15, 16, 21, 0.9);
+  --shadow-glow: 0 0 0 1px rgba(189, 147, 249, 0.28);
+  --halo-1: rgba(189, 147, 249, 0.08);
+  --halo-2: rgba(255, 121, 198, 0.06);
+}
+
+:root[data-theme="one-monokai"] {
+  color-scheme: dark;
+
+  --bg: 40 44 52;
+  --bg-elev: 33 37 43;
+  --bg-elev-2: 44 49 58;
+  --bg-sunken: 27 31 36;
+
+  --surface-2: 44 49 58;
+  --surface-hover: 51 57 66;
+  --surface-active: 62 68 81;
+
+  --line: 62 68 81;
+  --line-strong: 75 82 99;
+
+  --fg-strong: 220 223 228;
+  --fg-muted: 157 165 180;
+  --fg-dim: 103 111 125;
+
+  --brand-500: 224 108 117;
+  --brand-400: 232 139 146;
+  --brand-300: 242 170 176;
+  --on-brand: 27 31 36;
+
+  --ok: 152 195 121;
+  --warn: 229 192 123;
+  --danger: 224 108 117;
+  --info: 86 182 194;
+  --brass: 209 154 102;
+
+  --nav-bg: 33 37 43;
+  --nav-bg-2: 44 49 58;
+  --nav-fg: 220 223 228;
+  --nav-dim: 127 132 142;
+  --nav-active: 52 58 68;
+  --nav-line: 62 68 81;
+  --nav-accent: 224 108 117;
+
+  --grid-line: 51 57 66;
+  --node-bg: 33 37 43;
+
+  --shadow-panel: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -34px rgba(15, 17, 20, 0.9);
+  --shadow-drawer: -18px 0 48px -30px rgba(15, 17, 20, 0.9);
+  --shadow-glow: 0 0 0 1px rgba(224, 108, 117, 0.26);
+  --halo-1: rgba(224, 108, 117, 0.07);
+  --halo-2: rgba(209, 154, 102, 0.05);
+}
+
+:root[data-theme="night-owl-dark"] {
+  color-scheme: dark;
+
+  --bg: 1 22 39;
+  --bg-elev: 11 41 66;
+  --bg-elev-2: 15 51 85;
+  --bg-sunken: 1 14 26;
+
+  --surface-2: 11 41 66;
+  --surface-hover: 18 55 83;
+  --surface-active: 29 76 113;
+
+  --line: 29 59 83;
+  --line-strong: 47 90 125;
+
+  --fg-strong: 214 222 235;
+  --fg-muted: 151 176 198;
+  --fg-dim: 95 126 151;
+
+  --brand-500: 130 170 255;
+  --brand-400: 162 190 255;
+  --brand-300: 192 212 255;
+  --on-brand: 1 22 39;
+
+  --ok: 34 218 110;
+  --warn: 255 235 149;
+  --danger: 239 83 80;
+  --info: 127 219 202;
+  --brass: 247 140 108;
+
+  --nav-bg: 1 22 39;
+  --nav-bg-2: 11 41 66;
+  --nav-fg: 214 222 235;
+  --nav-dim: 95 126 151;
+  --nav-active: 15 51 85;
+  --nav-line: 29 59 83;
+  --nav-accent: 130 170 255;
+
+  --grid-line: 18 49 75;
+  --node-bg: 11 41 66;
+
+  --shadow-panel: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -34px rgba(0, 8, 16, 0.9);
+  --shadow-drawer: -18px 0 48px -30px rgba(0, 8, 16, 0.9);
+  --shadow-glow: 0 0 0 1px rgba(130, 170, 255, 0.28);
+  --halo-1: rgba(130, 170, 255, 0.08);
+  --halo-2: rgba(247, 140, 108, 0.05);
+}
+
+:root[data-theme="ayu-dark"] {
+  color-scheme: dark;
+
+  --bg: 10 14 20;
+  --bg-elev: 19 23 33;
+  --bg-elev-2: 26 31 43;
+  --bg-sunken: 6 8 16;
+
+  --surface-2: 26 31 43;
+  --surface-hover: 34 40 54;
+  --surface-active: 43 50 66;
+
+  --line: 41 48 61;
+  --line-strong: 61 71 89;
+
+  --fg-strong: 230 225 207;
+  --fg-muted: 179 177 173;
+  --fg-dim: 98 106 115;
+
+  --brand-500: 255 143 64;
+  --brand-400: 255 164 92;
+  --brand-300: 255 189 134;
+  --on-brand: 10 14 20;
+
+  --ok: 170 217 76;
+  --warn: 255 180 84;
+  --danger: 240 113 120;
+  --info: 89 194 255;
+  --brass: 230 180 80;
+
+  --nav-bg: 10 14 20;
+  --nav-bg-2: 19 23 33;
+  --nav-fg: 230 225 207;
+  --nav-dim: 98 106 115;
+  --nav-active: 26 31 43;
+  --nav-line: 41 48 61;
+  --nav-accent: 255 143 64;
+
+  --grid-line: 24 32 41;
+  --node-bg: 19 23 33;
+
+  --shadow-panel: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 18px 40px -34px rgba(4, 6, 10, 0.9);
+  --shadow-drawer: -18px 0 48px -30px rgba(4, 6, 10, 0.9);
+  --shadow-glow: 0 0 0 1px rgba(255, 143, 64, 0.26);
+  --halo-1: rgba(255, 143, 64, 0.07);
+  --halo-2: rgba(230, 180, 80, 0.05);
+}
+
+/* ---------- 亮色 ---------- */
+
+:root[data-theme="github-light"] {
+  color-scheme: light;
+
+  --bg: 255 255 255;
+  --bg-elev: 255 255 255;
+  --bg-elev-2: 246 248 250;
+  --bg-sunken: 246 248 250;
+
+  --surface-2: 246 248 250;
+  --surface-hover: 234 238 242;
+  --surface-active: 221 227 234;
+
+  --line: 208 215 222;
+  --line-strong: 175 184 193;
+
+  --fg-strong: 31 35 40;
+  --fg-muted: 89 99 110;
+  --fg-dim: 110 119 129;
+
+  --brand-500: 9 105 218;
+  --brand-400: 33 139 255;
+  --brand-300: 5 80 174;
+  --on-brand: 255 255 255;
+
+  --ok: 26 127 55;
+  --warn: 154 103 0;
+  --danger: 207 34 46;
+  --info: 9 105 218;
+  --brass: 191 135 0;
+
+  --nav-bg: 246 248 250;
+  --nav-bg-2: 234 238 242;
+  --nav-fg: 31 35 40;
+  --nav-dim: 89 99 110;
+  --nav-active: 221 244 255;
+  --nav-line: 208 215 222;
+  --nav-accent: 9 105 218;
+
+  --grid-line: 234 238 242;
+  --node-bg: 255 255 255;
+
+  --shadow-panel: 0 1px 2px rgba(31, 35, 40, 0.05), 0 10px 28px -24px rgba(31, 35, 40, 0.35);
+  --shadow-drawer: -18px 0 48px -34px rgba(31, 35, 40, 0.32);
+  --shadow-glow: 0 0 0 1px rgba(9, 105, 218, 0.22);
+  --halo-1: rgba(9, 105, 218, 0.07);
+  --halo-2: rgba(191, 135, 0, 0.05);
+}
+
+:root[data-theme="night-owl-light"] {
+  color-scheme: light;
+
+  --bg: 251 251 251;
+  --bg-elev: 255 255 255;
+  --bg-elev-2: 242 244 246;
+  --bg-sunken: 240 241 243;
+
+  --surface-2: 242 244 246;
+  --surface-hover: 232 235 239;
+  --surface-active: 221 226 232;
+
+  --line: 214 220 228;
+  --line-strong: 182 192 204;
+
+  --fg-strong: 64 63 83;
+  --fg-muted: 95 106 128;
+  /* 官方注释色 #989FB1 在白底 2.65:1，压深到 3.7:1 */
+  --fg-dim: 120 132 155;
+
+  --brand-500: 67 113 208;
+  --brand-400: 91 138 232;
+  --brand-300: 44 95 179;
+  --on-brand: 255 255 255;
+
+  --ok: 7 138 99;
+  --warn: 166 100 15;
+  --danger: 222 61 59;
+  --info: 72 118 214;
+  --brass: 184 134 47;
+
+  --nav-bg: 240 241 243;
+  --nav-bg-2: 230 233 237;
+  --nav-fg: 64 63 83;
+  --nav-dim: 107 116 136;
+  --nav-active: 225 232 245;
+  --nav-line: 214 220 228;
+  --nav-accent: 72 118 214;
+
+  --grid-line: 234 237 241;
+  --node-bg: 255 255 255;
+
+  --shadow-panel: 0 1px 2px rgba(64, 63, 83, 0.05), 0 10px 28px -24px rgba(64, 63, 83, 0.35);
+  --shadow-drawer: -18px 0 48px -34px rgba(64, 63, 83, 0.32);
+  --shadow-glow: 0 0 0 1px rgba(72, 118, 214, 0.22);
+  --halo-1: rgba(72, 118, 214, 0.06);
+  --halo-2: rgba(184, 134, 47, 0.05);
+}
+
+:root[data-theme="ayu-light"] {
+  color-scheme: light;
+
+  --bg: 250 250 250;
+  --bg-elev: 255 255 255;
+  --bg-elev-2: 243 244 245;
+  --bg-sunken: 240 241 242;
+
+  --surface-2: 243 244 245;
+  --surface-hover: 233 235 236;
+  --surface-active: 223 227 230;
+
+  --line: 221 225 227;
+  --line-strong: 194 200 204;
+
+  --fg-strong: 59 64 69;
+  --fg-muted: 107 113 120;
+  --fg-dim: 117 126 136;
+
+  /* Ayu 的 #FF9940 直接当 12px 文字只有 2.1:1，所以 500 用色块、300 用可读的深橙 */
+  --brand-500: 250 141 62;
+  --brand-400: 255 164 92;
+  --brand-300: 154 84 9;
+  --on-brand: 43 27 12;
+
+  --ok: 63 122 20;
+  --warn: 160 92 0;
+  --danger: 192 40 31;
+  --info: 34 112 170;
+  --brass: 143 100 20;
+
+  --nav-bg: 243 244 245;
+  --nav-bg-2: 233 235 236;
+  --nav-fg: 59 64 69;
+  --nav-dim: 110 119 129;
+  --nav-active: 255 235 217;
+  --nav-line: 221 225 227;
+  /* #FA8D3E 压在浅橙选中底上只有 2.0:1，选中态的竖条/图标改用深橙 */
+  --nav-accent: 222 107 23;
+
+  --grid-line: 236 238 239;
+  --node-bg: 255 255 255;
+
+  --shadow-panel: 0 1px 2px rgba(59, 64, 69, 0.05), 0 10px 28px -24px rgba(59, 64, 69, 0.35);
+  --shadow-drawer: -18px 0 48px -34px rgba(59, 64, 69, 0.32);
+  --shadow-glow: 0 0 0 1px rgba(250, 141, 62, 0.24);
+  --halo-1: rgba(250, 141, 62, 0.07);
+  --halo-2: rgba(143, 100, 20, 0.05);
+}
+
+:root[data-theme="atom-one-light"] {
+  color-scheme: light;
+
+  --bg: 250 250 250;
+  --bg-elev: 255 255 255;
+  --bg-elev-2: 240 240 241;
+  --bg-sunken: 234 234 235;
+
+  --surface-2: 240 240 241;
+  --surface-hover: 231 231 233;
+  --surface-active: 221 221 224;
+
+  --line: 219 219 221;
+  --line-strong: 191 191 195;
+
+  --fg-strong: 56 58 66;
+  --fg-muted: 88 90 101;
+  /* 官方注释色 #A0A1A7 在浅底 2.5:1，压深到 3.4:1 */
+  --fg-dim: 124 125 134;
+
+  /* 原色 #4078F2 配白字只有 4.05:1，500 压深到 4.6:1，400 保留原色做悬停/光晕 */
+  --brand-500: 58 108 221;
+  --brand-400: 64 120 242;
+  --brand-300: 50 88 196;
+  --on-brand: 255 255 255;
+
+  --ok: 53 135 58;
+  --warn: 152 104 1;
+  --danger: 193 58 50;
+  --info: 54 103 214;
+  --brass: 151 112 27;
+
+  --nav-bg: 240 240 241;
+  --nav-bg-2: 231 231 233;
+  --nav-fg: 56 58 66;
+  --nav-dim: 110 112 120;
+  --nav-active: 227 234 249;
+  --nav-line: 219 219 221;
+  --nav-accent: 64 120 242;
+
+  --grid-line: 236 236 238;
+  --node-bg: 255 255 255;
+
+  --shadow-panel: 0 1px 2px rgba(56, 58, 66, 0.05), 0 10px 28px -24px rgba(56, 58, 66, 0.35);
+  --shadow-drawer: -18px 0 48px -34px rgba(56, 58, 66, 0.32);
+  --shadow-glow: 0 0 0 1px rgba(64, 120, 242, 0.22);
+  --halo-1: rgba(64, 120, 242, 0.06);
+  --halo-2: rgba(151, 112, 27, 0.05);
+}
+
+@layer components {
+  /* 工具软件的面板：1px 描边 + 极浅阴影，不用大圆角与毛玻璃 */
+  .panel {
+    @apply rounded-lg border border-line bg-ink-900;
+    box-shadow: var(--shadow-panel);
+  }
+
+  .panel-flat {
+    @apply rounded-lg border border-line bg-surface-2;
+  }
+
+  /* 画布上的节点卡片 */
+  .node-card {
+    @apply rounded-lg border border-line bg-canvas-node;
+    box-shadow: var(--shadow-panel);
+  }
+
+  .hover-lift {
+    @apply transition-all duration-150 ease-out hover:border-line-strong hover:bg-surface-hover;
+  }
+
+  .mono {
+    @apply font-mono text-[12px] tracking-tight;
+  }
+
+  /* 分栏线：比 border 更淡，用于工具条/状态栏这类固定框架 */
+  .divider-x {
+    @apply border-line/80;
+  }
+
+  .kbd {
+    @apply rounded border border-line bg-surface-2 px-1 py-[1px] font-mono text-[11.5px] text-text-dim;
+  }
+}
+
+/* 画布里的卡片：卡片内的文字块统一允许收缩，避免长路径把卡片撑开 */
+.node-card > * {
+  min-width: 0;
+}
+
+/* ---- xyflow：把默认样式压到工作台风格 ---- */
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke-default: rgb(var(--line-strong));
+  --xy-node-border-radius: 8px;
+}
+
+/* 资源图谱整块画布都可拖：空闲是抓手，按住时变抓取。
+   用 CSS 而不是 onMoveStart 切 state —— 缩放也会触发移动事件，
+   那样滚个轮子光标就会闪一下。 */
+[data-graph] .react-flow__pane {
+  cursor: grab;
+}
+
+[data-graph] .react-flow__pane.dragging {
+  cursor: grabbing;
+}
+
+.react-flow__node {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+  /* 节点自身不画边框，交给 .node-card，避免双描边 */
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.react-flow__node:focus,
+.react-flow__node:focus-visible {
+  outline: none;
+}
+
+.react-flow__handle {
+  border: none;
+  background: transparent;
+  min-width: 1px;
+  min-height: 1px;
+}
+
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.react-flow__edge-textbg {
+  stroke: none;
+}
+
+.react-flow__controls {
+  border: 1px solid rgb(var(--line));
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: var(--shadow-panel);
+}
+
+.react-flow__controls-button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-bottom: 1px solid rgb(var(--line));
+  background: rgb(var(--node-bg));
+  color: rgb(var(--fg-muted));
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+.react-flow__controls-button:hover {
+  background: rgb(var(--surface-hover));
+  color: rgb(var(--fg-strong));
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor;
+  max-width: 11px;
+  max-height: 11px;
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__pane {
+  cursor: grab;
+}
+
+.react-flow__pane.dragging {
+  cursor: grabbing;
+}

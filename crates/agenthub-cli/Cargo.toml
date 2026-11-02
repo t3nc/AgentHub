@@ -1,0 +1,16 @@
+[package]
+name = "agenthub-cli"
+version.workspace = true
+edition.workspace = true
+license-file = "../../LICENSE"
+description = "AgentHub 命令行：与 GUI 共用同一套核心逻辑"
+
+[[bin]]
+name = "agenthub"
+path = "src/main.rs"
+
+[dependencies]
+agenthub-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+clap.workspace = true

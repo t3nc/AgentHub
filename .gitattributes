@@ -1,0 +1,28 @@
+# 开发机在 macOS 与 Windows 之间切换：行尾不能由各机的 core.autocrlf 决定，
+# 否则同一份源码在另一端检出就是「整文件被改写」的 diff。
+* text=auto eol=lf
+
+# Windows 脚本必须保持 CRLF（PowerShell 5 对 LF 的 .ps1 容忍度差）
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 可执行脚本与配置保持 LF
+*.sh  text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# 二进制：不要做行尾转换，也不要尝试 diff
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+*.icns binary
+*.db   binary
+*.woff binary
+*.woff2 binary
+
+# 锁文件是文本，但仍显式声明，避免被当成二进制或不参与归一化
+Cargo.lock       text eol=lf
+package-lock.json text eol=lf

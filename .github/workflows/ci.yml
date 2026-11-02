@@ -1,0 +1,176 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+# 默认只读；出包作业单独提权
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # 开发机在 macOS 与 Windows 之间切换：两端都要跑，避免一端修好另一端变红
+        os: [windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      # 开发仓里可能有 .cargo/config.toml 指向 rsproxy 稀疏镜像（提交者本机网络环境），
+      # 公开仓不带这个文件。CI 一律走官方 crates.io，避免依赖第三方镜像可用性。
+      - name: 移除本机镜像配置
+        shell: bash
+        run: rm -f .cargo/config.toml
+
+      - name: cargo fmt
+        run: cargo fmt --all --check
+
+      - name: cargo clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo test
+        run: cargo test -p agenthub-core
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - name: npm ci
+        working-directory: apps/desktop
+        run: npm ci
+
+      - name: typecheck
+        working-directory: apps/desktop
+        run: npm run typecheck
+
+      - name: build frontend
+        working-directory: apps/desktop
+        run: npm run build
+
+      # 本地化门槛：词典三语必须齐平，且后端代码里不再有中文字符串字面量。
+      # 前端几行是「示例内容 / 比对哨兵」这类有意保留项，脚本只报告不判失败。
+      - name: i18n check
+        run: node scripts/i18n-check.mjs --strict
+
+  # 打包冒烟：只在 push 到 main 时跑（PR 上不烧 runner）。
+  # 目的是保证「两端都能出安装包」不只靠本机，产物留 7 天便于回滚对比。
+  bundle:
+    name: bundle (${{ matrix.os }})
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      # 打包不需要 clippy / rustfmt
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          # 和 check job 分开缓存：release 产物与 debug 不共用
+          key: bundle-${{ matrix.os }}
+
+      - name: 移除本机镜像配置
+        shell: bash
+        run: rm -f .cargo/config.toml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - name: npm ci
+        working-directory: apps/desktop
+        run: npm ci
+
+      # `beforeBuildCommand` 会自己跑一次 npm run build，这里不用重复
+      - name: tauri build
+        working-directory: apps/desktop
+        run: npm run tauri build
+
+      - name: 上传安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: agenthub-${{ matrix.os }}
+          path: |
+            target/release/bundle/nsis/*.exe
+            target/release/bundle/msi/*.msi
+            target/release/bundle/dmg/*.dmg
+            target/release/bundle/macos/*.app
+          if-no-files-found: error
+          retention-days: 7
+
+  # 正式发版：只在公开发布仓（t3nc/AgentHub）打 v* 标签时跑。
+  # 开发仓打标签不会触发——那里的打包由上面的 bundle 覆盖。
+  # 产物直接挂到草稿 Release，人工复核后点发布。
+  release:
+    name: release (${{ matrix.os }})
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/v') && github.repository == 't3nc/AgentHub'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows 只出 NSIS，避免额外下载 WiX；macOS 只出 dmg
+          - os: windows-latest
+            args: --bundles nsis
+          - os: macos-latest
+            args: --bundles dmg
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.os }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - name: npm ci
+        working-directory: apps/desktop
+        run: npm ci
+
+      # tauri-action 不会替你装前端依赖，所以上面单独 npm ci；
+      # projectPath 指到 apps/desktop，由 tauri.conf.json 的 beforeBuildCommand 构建前端。
+      - name: tauri build + draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/desktop
+          tagName: ${{ github.ref_name }}
+          releaseName: AgentHub ${{ github.ref_name }}
+          releaseBody: |
+            安装包见下方附件。完整变更见仓库根目录的 CHANGELOG.md。
+
+            macOS 安装包未做 Apple 签名与公证，首次打开请右键 → 打开。
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}

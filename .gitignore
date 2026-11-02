@@ -1,0 +1,34 @@
+target/
+node_modules/
+dist/
+*.log
+# macOS 与 Windows 两端的系统产物
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+# Windows 构建/调试产物
+*.pdb
+*.ilk
+.vs/
+apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/target/
+# 本机开发产物：.codebuddy 的计划/验证记录与 ui 原型不随仓库分发
+.codebuddy/
+ui/
+# 本机验收/临时产物
+shot-*.png
+*.err
+dedupe-plan.json
+.chrome-profile/
+# Cloudflare wrangler 本地缓存
+.wrangler/
+# 打包签名产物与本机环境文件：一律不进仓
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+.env
+.env.*
+# 导出脚本在 macOS/Linux 上的临时目录
+.export-tmp/

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" shape-rendering="crispEdges" role="img" aria-labelledby="title desc">
+  <title id="title">AgentHub 连通 App 图标</title>
+  <desc id="desc">柔珊瑚色圆角方底，中央为由六段相连矩形构成的像素方阵标志。</desc>
+  <rect width="512" height="512" rx="112" fill="#B9634D"/>
+  <g fill="#F4F6EE">
+    <rect x="72" y="72" width="92" height="92"/>
+    <rect x="256" y="72" width="92" height="92"/>
+    <rect x="72" y="164" width="368" height="92"/>
+    <rect x="164" y="256" width="92" height="92"/>
+    <rect x="348" y="256" width="92" height="92"/>
+    <rect x="72" y="348" width="368" height="92"/>
+  </g>
+</svg>

@@ -1,0 +1,134 @@
+AgentHub Non-Commercial License 1.0
+===================================
+
+Copyright (c) 2026 AgentHub
+Contact: t3nc@outlook.com
+
+This license is based on the MIT License. The right to sell copies of the
+Software has been removed, and conditions on commercial distribution have
+been added. It is NOT the MIT License, and it is NOT an OSI-approved open
+source license. See Section 9 for the exact relationship.
+
+--------------------------------------------------------------------------------
+
+1. Definitions
+
+   "Software" means the source code, documentation, assets and any other
+   material distributed under this license.
+
+   "Derivative Work" means any work, in source or object form, that is based
+   on or incorporates the Software, in whole or in substantial part.
+
+   "Sale" means any of the following, whether direct or indirect, and whether
+   or not a fee is charged:
+
+     (a) selling, reselling, renting, leasing, lending, sublicensing or
+         otherwise transferring the Software or a Derivative Work for
+         monetary or other consideration;
+
+     (b) distributing the Software or a Derivative Work as part of, or
+         bundled with, a product or service for which payment is required;
+
+     (c) offering the Software or a Derivative Work, or functionality that is
+         substantially the Software, to third parties as a paid hosted or
+         managed service (including software-as-a-service);
+
+     (d) distributing the Software or a Derivative Work under any terms other
+         than this license.
+
+   "Internal Use" means use of the Software by an individual, or within a
+   single legal entity and its employees or contractors, for that party's own
+   internal purposes, where the Software is not redistributed outside that
+   party and not made available to third parties for a fee.
+
+2. Grant
+
+   Subject to the conditions in Section 3, permission is hereby granted, free
+   of charge, to any person obtaining a copy of the Software, to deal in the
+   Software without restriction, including without limitation the rights to
+   use, copy, modify, merge, publish and distribute copies of the Software,
+   and to permit persons to whom the Software is furnished to do so, provided
+   that every recipient receives a copy of this license and is bound by it.
+
+   No right to sublicense, and no right to engage in a Sale, is granted.
+
+3. Conditions
+
+   (a) Notices. The above copyright notice, this license text and the
+       attribution in Section 5 must be included in all copies of the
+       Software and in all Derivative Works.
+
+   (b) No Sale. You may not engage in a Sale of the Software or of any
+       Derivative Work without prior written permission from the copyright
+       holder. Request one at the contact address above.
+
+   (c) Internal Use is permitted without a commercial license. Using the
+       Software inside an organization as a tool — including for internal
+       development, automation, operations and evaluation — does not
+       constitute a Sale, provided the Software is not redistributed outside
+       that organization and not offered to third parties for a fee.
+
+   (d) Services carve-out. Providing consulting, support, training or
+       implementation services that do not themselves redistribute the
+       Software or a Derivative Work as a deliverable do not constitute a
+       Sale.
+
+   (e) Modifications. Derivative Works that you distribute must retain the
+       notices in Section 3(a) and must clearly indicate that they have been
+       modified, and must not be presented as the original Software.
+
+   (f) No trademark grant. This license does not grant any right to use the
+       name "AgentHub", its logos or its icons. See Section 6.
+
+4. Commercial Licensing
+
+   Any use that Section 3 does not permit requires a separate written
+   commercial license. Enquiries: t3nc@outlook.com.
+
+5. Attribution
+
+   Distribution of the Software or of a Derivative Work, where permitted by
+   this license, must credit the original project and link to its repository:
+
+     AgentHub — https://github.com/t3nc/AgentHub
+
+6. Trademarks
+
+   The name "AgentHub" and the AgentHub logos and icons are not licensed under
+   this document. No permission is granted to use them in a way that suggests
+   endorsement, or in the name of a Derivative Work, without prior written
+   permission.
+
+7. Disclaimer of Warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+   IN THE SOFTWARE.
+
+8. Termination
+
+   Any breach of this license terminates the rights granted in Section 2
+   automatically. The copyright holder may reinstate those rights in writing.
+   Sections 3(a), 3(b), 3(f), 5, 6, 7 and this Section survive termination.
+
+9. Relationship to the MIT License and to Open Source
+
+   This license is derived from the MIT License but is not the MIT License:
+   the grant of the right to sell copies has been removed, a non-commercial
+   condition has been added, and a trademark reservation has been added. It
+   does not meet the Open Source Definition (in particular its requirement of
+   no discrimination against fields of endeavor), so the Software must be
+   described as "source-available", not as "open source".
+
+   Third-party components included in this repository keep their own licenses,
+   which are listed alongside them (for example
+   apps/desktop/src/assets/agents/LICENSE-lobehub-icons.txt and
+   apps/desktop/src/assets/fonts/LICENSE-OFL.txt).
+
+--------------------------------------------------------------------------------
+
+This document is a license, not legal advice.

@@ -1,0 +1,48 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/agenthub-core",
+    "crates/agenthub-gateway",
+    "crates/agenthub-cli",
+    "apps/desktop/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+# 许可不是标准 SPDX 标识（MIT 去掉销售授权 + 非商业条款），因此不在这里声明 license，
+# 各成员包用 license-file 指向根目录 LICENSE；写成 SPDX 标识等于虚假声明。
+rust-version = "1.90"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+toml_edit = "0.25"
+saphyr = "0.3"
+blake3 = "1"
+walkdir = "2"
+rayon = "1"
+thiserror = "2"
+tempfile = "3"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+rusqlite = { version = "0.41", features = ["bundled"] }
+trash = "5"
+clap = { version = "4", features = ["derive"] }
+agenthub-core = { path = "crates/agenthub-core" }
+agenthub-gateway = { path = "crates/agenthub-gateway" }
+# 本地代理服务：只有桌面壳与网关 crate 依赖它们，CLI 不受影响
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "net", "sync", "time", "macros"] }
+reqwest = { version = "0.12", default-features = false, features = [
+    "stream",
+    "json",
+    "rustls-tls-native-roots",
+] }
+bytes = "1"
+futures-util = "0.3"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" shape-rendering="crispEdges" role="img" aria-labelledby="title desc">
+  <title id="title">AgentHub 连通深色标志</title>
+  <desc id="desc">透明底标志，由六个相连矩形构成，适用于亮色界面。</desc>
+  <g fill="#34413B" transform="translate(56 56) scale(4)">
+    <rect x="2" y="2" width="24" height="24"/>
+    <rect x="50" y="2" width="24" height="24"/>
+    <rect x="2" y="26" width="96" height="24"/>
+    <rect x="26" y="50" width="24" height="24"/>
+    <rect x="74" y="50" width="24" height="24"/>
+    <rect x="2" y="74" width="96" height="24"/>
+  </g>
+</svg>

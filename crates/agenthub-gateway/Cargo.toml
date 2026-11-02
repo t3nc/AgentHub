@@ -1,0 +1,20 @@
+[package]
+name = "agenthub-gateway"
+version.workspace = true
+edition.workspace = true
+license-file = "../../LICENSE"
+description = "AgentHub 本地 Provider 网关：上游透传、按模型路由、多上游聚合与流式转发"
+
+[dependencies]
+agenthub-core.workspace = true
+axum.workspace = true
+tokio.workspace = true
+reqwest.workspace = true
+bytes.workspace = true
+futures-util.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
+tempfile.workspace = true

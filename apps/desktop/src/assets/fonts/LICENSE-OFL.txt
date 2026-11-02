@@ -1,0 +1,32 @@
+AgentHubNerdMono.ttf
+====================
+
+来源
+----
+文件取自 JetBrains Mono 的 Nerd Fonts 补丁版：
+  JetBrainsMonoNerdFontMono-Regular.ttf
+  https://github.com/ryanoasis/nerd-fonts/releases  （包名 JetBrainsMono.zip）
+即 JetBrains Mono（`JetBrainsMonoNerdFontMono`，图标单格宽的 Mono 变体），
+由 Nerd Fonts 项目追加 Powerline / Font Awesome / Material 等图标字形。
+
+用途
+----
+仅作为内嵌终端的兜底字体（`@font-face` family 名 `AgentHub Nerd Mono`）：
+当用户系统里没有安装 Nerd Font 时，仍然能显示 oh-my-posh 一类提示符里的图标，
+避免退化成方块。系统已安装的 Nerd Font 优先于它。
+
+版权与许可
+----------
+以下三行直接取自字体 name 表（name id 0 / 13 / 14），未做改写：
+
+  Copyright 2020 The JetBrains Mono Project Authors
+  (https://github.com/JetBrains/JetBrainsMono)
+
+  This Font Software is licensed under the SIL Open Font License, Version 1.1.
+  This license is available with a FAQ at: https://scripts.sil.org/OFL
+
+许可全文：https://scripts.sil.org/OFL
+（SIL Open Font License 1.1，允许随软件一同分发与嵌入。）
+
+Nerd Fonts 项目本身同样以 OFL 1.1 发布其补丁字体，图标字体部分的许可声明
+见 https://github.com/ryanoasis/nerd-fonts/blob/master/LICENSE 。

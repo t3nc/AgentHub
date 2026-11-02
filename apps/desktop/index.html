@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/src/assets/brand/agenthub-app-icon-connected.svg" />
+    <title>AgentHub</title>
+    <script>
+      (function () {
+        // 首帧前定主题：算出明暗 → 取对应模式存储的主题 id → 落到 html 上。
+        // 存储键与 src/lib/theme.tsx 保持一致；id 不认识时 CSS 会退回 :root / .dark 的兜底色板，
+        // 所以这里不做白名单，避免和 src/lib/themes 的 id 表各写一份、日后对不上。
+        try {
+          var mode = localStorage.getItem("agenthub-theme") || "system";
+          var dark =
+            mode === "dark" ||
+            (mode === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var id = localStorage.getItem(dark ? "agenthub-theme-dark" : "agenthub-theme-light");
+          var root = document.documentElement;
+          root.classList.toggle("dark", dark);
+          if (id) root.dataset.theme = id;
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      (function () {
+        // 首帧前定语言：只写 <html lang>，标题交给 React（切语言时也要跟着变）。
+        // 判定规则与 src/lib/i18n/detect.ts 的 resolveTag 一致，改一处要同步另一处。
+        try {
+          var stored = localStorage.getItem("agenthub-locale");
+          var lang = "en";
+          if (stored && stored !== "system") {
+            lang = stored === "zh-hant" ? "zh-Hant" : stored === "zh-hans" ? "zh-Hans" : stored;
+          } else {
+            var tags = (navigator.languages || []).concat([navigator.language || ""]);
+            for (var i = 0; i < tags.length; i += 1) {
+              var tag = String(tags[i] || "").toLowerCase().replace(/_/g, "-");
+              if (tag.indexOf("zh") === 0) {
+                lang =
+                  tag.indexOf("-tw") > -1 ||
+                  tag.indexOf("-hk") > -1 ||
+                  tag.indexOf("-mo") > -1 ||
+                  tag.indexOf("hant") > -1
+                    ? "zh-Hant"
+                    : "zh-Hans";
+                break;
+              }
+              if (tag.indexOf("en") === 0) {
+                lang = "en";
+                break;
+              }
+            }
+          }
+          document.documentElement.lang =
+            lang === "en" ? "en-US" : lang === "zh-Hant" ? "zh-TW" : "zh-CN";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
