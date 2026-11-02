@@ -104,6 +104,9 @@ cd apps/desktop && npm run tauri build -- --bundles dmg
 
 - 首次打包需要联网下载打包器（NSIS / WiX）。只打 NSIS 可以避开 WiX 的额外下载（脚本已加 `--bundles nsis`）。
 - macOS 产物默认**没有签名与公证**，分发给别人时对方需要右键 → 打开。
+- dmg 只针对**当前机器架构**：Apple Silicon 出 `aarch64.dmg`。要给 Intel 出包，加
+  `--target x86_64-apple-darwin` 并先 `rustup target add x86_64-apple-darwin`。
+  官方 Release 目前只有 Apple Silicon 的 dmg。
 - 图标由 `npx tauri icon src-tauri/icons/icon.png` 生成，换图标后重跑一次。
 
 ## 6. 改完代码怎么自检

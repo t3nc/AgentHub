@@ -45,8 +45,10 @@ AgentHub 的做法是**链接优先**——内容只留一份，其余位置建�
 
 | 平台 | 产物 |
 |---|---|
-| Windows | `AgentHub_<版本>_x64-setup.exe`（NSIS） |
-| macOS | `AgentHub_<版本>_x64.dmg` / `aarch64.dmg` |
+| Windows x64 | `AgentHub_<版本>_x64-setup.exe`（NSIS） |
+| macOS Apple Silicon | `AgentHub_<版本>_aarch64.dmg` |
+
+> Intel Mac 目前没有预编译包，按 [docs/build.md](docs/build.md) 在本地构建即可。
 
 > **macOS 首次打开**：安装包未做 Apple 开发者签名与公证，系统会提示「无法验证开发者」。
 > 请右键点击应用 → **打开**，或到「系统设置 → 隐私与安全性」里允许。也可以参照下面的构建章节自己编译。
