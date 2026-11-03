@@ -6,6 +6,21 @@ Rust + Tauri 2，macOS / Windows 双端；核心逻辑在 `agenthub-core`，GUI 
 
 **软件主页：[agenthub.yogo.wang](https://agenthub.yogo.wang)** · [下载安装](#下载安装) · [从源码构建](docs/build.md) · [变更记录](CHANGELOG.md) · [漏洞报告](SECURITY.md)
 
+## 快速开始
+
+到 [Releases](https://github.com/t3nc/AgentHub/releases) 下载对应平台的安装包（具体产物见[下载安装](#下载安装)），装好后直接打开即可 —— 首次运行只做只读扫描，不会自动改写任何目录。
+
+### macOS 首次启动
+
+安装包未做 Apple 开发者签名与公证，首次打开时系统会提示「无法验证开发者」：
+
+1. 在 Finder 里**按住 Control 点击**应用图标，选「打开」；或前往「系统设置 → 隐私与安全性」选择「仍要打开」。
+2. 仅当安装包来自上述官方 Releases、且系统仍提示「已损坏」时，再清除隔离属性：
+
+```bash
+xattr -rd com.apple.quarantine "/Applications/AgentHub.app"
+```
+
 ![总览](docs/screenshots/light-dashboard.png)
 
 | 暗色 | 亮色 |
@@ -52,8 +67,7 @@ AgentHub 的做法是**链接优先**——内容只留一份，其余位置建�
 
 > Intel Mac 目前没有预编译包，按 [docs/build.md](docs/build.md) 在本地构建即可。
 
-> **macOS 首次打开**：安装包未做 Apple 开发者签名与公证，系统会提示「无法验证开发者」。
-> 请右键点击应用 → **打开**，或到「系统设置 → 隐私与安全性」里允许。也可以参照下面的构建章节自己编译。
+> **macOS 首次打开**：安装包未做 Apple 开发者签名与公证，Gatekeeper 的处理方式见上文[快速开始](#快速开始)。
 
 ## 从源码构建
 

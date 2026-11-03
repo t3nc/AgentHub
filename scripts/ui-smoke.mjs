@@ -119,6 +119,20 @@ class Cdp {
 /** CSS 选择器 → 返回布尔值的 JS 表达式（`waitFor` 只吃表达式）。 */
 const sel = (selector) => `!!document.querySelector(${JSON.stringify(selector)})`;
 
+/**
+ * 「仅 Windows」在三种界面语言里的写法（见 lib/i18n/{zh-Hans,en,zh-Hant}/common.ts
+ * 的 `common.strategy.onlyWindows`）。首次运行按系统语言选语言，所以断言不能钉死中文，
+ * 否则同一份代码在英文系统的机器上必红。
+ */
+const ONLY_WINDOWS = ["仅 Windows", "僅 Windows", "Windows only"];
+const hasOnlyWindows = (text) => ONLY_WINDOWS.some((snippet) => text.includes(snippet));
+
+/**
+ * 「新建缓存不单列」在三种界面语言里的片段（见 `l10n::Msg::UsageTotalsNote`）。
+ * 脚注文案来自 Rust 常量，前端热更不会改它——改完必须重编才看得到。
+ */
+const NOTE_NOT_LISTED = ["不单列", "不單列", "not listed separately"];
+
 const js = {
   /** 平台默认策略：`[data-platform-strategy]` 上的值 */
   platformStrategy: `document.querySelector('[data-platform-strategy]')?.getAttribute('data-platform-strategy')`,
@@ -219,7 +233,7 @@ check("设置页：macOS 上「目录联接」置灰并说明原因", async (cdp
   const junction = await cdp.eval(js.strategyButton("junction"));
   assert(junction, "设置页找不到目录联接按钮");
   assert(junction.disabled, "macOS 上目录联接必须置灰");
-  assert(junction.text.includes("仅 Windows"), `置灰按钮应说明原因，实际「${junction.text}」`);
+  assert(hasOnlyWindows(junction.text), `置灰按钮应说明原因，实际「${junction.text}」`);
   const symlink = await cdp.eval(js.strategyButton("symlink"));
   assert(symlink && !symlink.disabled, "符号链接不该被置灰");
 });
@@ -231,7 +245,7 @@ check("设置页：Windows 上「目录联接」可选", async (cdp) => {
   assert(platform === "junction", `Windows 演示的平台默认应是 junction，实际 ${platform}`);
   const junction = await cdp.eval(js.strategyButton("junction"));
   assert(junction && !junction.disabled, "Windows 上目录联接必须可选");
-  assert(!junction.text.includes("仅 Windows"), "Windows 上不该出现「仅 Windows」后缀");
+  assert(!hasOnlyWindows(junction.text), "Windows 上不该出现「仅 Windows」后缀");
 });
 
 check("技能详情：macOS 上目录联接置灰并给出说明", async (cdp) => {
@@ -242,7 +256,7 @@ check("技能详情：macOS 上目录联接置灰并给出说明", async (cdp) =
   const option = await cdp.eval(js.junctionOption);
   assert(option, "下拉里没有 junction 选项");
   assert(option.disabled, "macOS 上目录联接选项必须 disabled");
-  assert(option.text.includes("仅 Windows"), `选项文案应说明原因，实际「${option.text}」`);
+  assert(hasOnlyWindows(option.text), `选项文案应说明原因，实际「${option.text}」`);
   assert(await cdp.eval(js.hasJunctionNote), "应显示「目录联接仅 Windows 支持」的说明");
 });
 
@@ -370,6 +384,52 @@ check("用量趋势：同一根柱内移动不换列、浮层不闪", async (cdp
   await new Promise((r) => setTimeout(r, 150));
   const third = await cdp.eval(js.tooltip);
   assert(third && third.head !== first.head, `换列后浮层应显示另一段时间：${third?.head}`);
+});
+
+check("用量页：5 张指标卡 + 7 列明细表头", async (cdp) => {
+  await cdp.goto(`${BASE}/?platform=macos#usage`);
+  await cdp.waitFor(sel("[data-usage-metrics]"), "指标条没渲染出来");
+  const metrics = await cdp.eval(
+    `[...document.querySelectorAll('[data-usage-metrics] [data-metric]')].map((el) => el.getAttribute('data-metric'))`
+  );
+  assert(
+    Array.isArray(metrics) && metrics.length === 5,
+    `指标卡应是 5 张（三项计量 + 合计 + 花费），实际 ${metrics?.length}：${metrics?.join(",")}`
+  );
+  assert(
+    !metrics.includes("cache_write"),
+    "「新建缓存」不该再单列成指标卡"
+  );
+  await cdp.waitFor(sel("[data-usage-col]"), "明细表头没渲染出来");
+  const columns = await cdp.eval(
+    `[...document.querySelectorAll('[data-usage-col]')].map((el) => el.getAttribute('data-usage-col'))`
+  );
+  assert(
+    columns.length === 7,
+    `明细表应是 7 列，实际 ${columns.length}：${columns.join(",")}`
+  );
+  assert(!columns.includes("cache_write"), "明细表不该再有「新建缓存」列");
+});
+
+check("用量页：浮层三分项 + 脚注说明", async (cdp) => {
+  await cdp.goto(`${BASE}/?platform=macos#usage`);
+  await cdp.waitFor(sel("[data-usage-axis]"), "趋势图的 x 轴没渲染出来");
+  const bars = await cdp.eval(js.usageBars);
+  assert(bars > 0, "演示数据里没有柱子，浮层断言无从谈起");
+  assert(await cdp.eval(js.moveTrend(0, bars, 0.5)), "找不到趋势图容器");
+  await cdp.waitFor(sel('[data-usage-tooltip] [data-usage-tooltip-row]'), "悬停后浮层没出现");
+  const rows = await cdp.eval(
+    `document.querySelectorAll('[data-usage-tooltip] [data-usage-tooltip-row]').length`
+  );
+  assert(rows === 3, `浮层应是三分项（非缓存输入 / 命中缓存 / 输出），实际 ${rows} 行`);
+
+  await cdp.waitFor(sel("[data-usage-note]"), "右栏脚注没渲染出来");
+  const note = await cdp.eval(`document.querySelector('[data-usage-note]').textContent.trim()`);
+  assert(note.length > 20, `脚注内容过短：「${note}」`);
+  assert(
+    NOTE_NOT_LISTED.some((snippet) => note.includes(snippet)),
+    `脚注应说明「新建缓存不单列」，实际「${note}」`
+  );
 });
 
 check("供应商池：成员显示 ×权重 与 #优先级", async (cdp) => {

@@ -301,7 +301,9 @@ export function Usage() {
                 <SourcePanel sources={usage?.sources ?? []} />
               </Panel>
 
-              <p className="px-1 text-[11px] leading-relaxed text-text-dim">{usage?.note}</p>
+              <p className="px-1 text-[11px] leading-relaxed text-text-dim" data-usage-note>
+                {usage?.note}
+              </p>
             </aside>
           </div>
         </>

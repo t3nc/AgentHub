@@ -2341,9 +2341,9 @@ messages! {
         en: "No parseable usage records in this period.",
     },
     CliUsageTotalsHead => {
-        zh_hans: "非缓存输入 {input} 命中缓存 {cache_read} 新建缓存 {cache_write} 输出 {output}",
-        zh_hant: "非快取輸入 {input} 命中快取 {cache_read} 新建快取 {cache_write} 輸出 {output}",
-        en: "uncached in {input} cache hit {cache_read} cache write {cache_write} output {output}",
+        zh_hans: "非缓存输入 {input} 命中缓存 {cache_read} 输出 {output}",
+        zh_hant: "非快取輸入 {input} 命中快取 {cache_read} 輸出 {output}",
+        en: "uncached in {input} cache hit {cache_read} output {output}",
     },
     CliUsageTotalsRow => {
         zh_hans: "合计       {total} 调用 {calls} 估算 {cost}",
@@ -2366,9 +2366,9 @@ messages! {
         en: "day",
     },
     CliUsageTrendRow => {
-        zh_hans: "{label}  输入 {input} 缓存 {cache} 新建 {write} 输出 {output} 合计 {total}",
-        zh_hant: "{label}  輸入 {input} 快取 {cache} 新建 {write} 輸出 {output} 合計 {total}",
-        en: "{label}  in {input} cache {cache} write {write} out {output} total {total}",
+        zh_hans: "{label}  输入 {input} 缓存 {cache} 输出 {output} 合计 {total}",
+        zh_hant: "{label}  輸入 {input} 快取 {cache} 輸出 {output} 合計 {total}",
+        en: "{label}  in {input} cache {cache} out {output} total {total}",
     },
     CliByAgent => {
         zh_hans: "== 按 agent ==",
@@ -2431,9 +2431,9 @@ messages! {
         en: "No model prices registered yet. Add one with `agenthub pricing set <model> --input 3 --output 15`.",
     },
     CliPriceRow => {
-        zh_hans: "{model} 输入 {input} 缓存 {cache} 新建 {write} 输出 {output} 合计 {total} 调用 {calls} {source}",
-        zh_hant: "{model} 輸入 {input} 快取 {cache} 新建 {write} 輸出 {output} 合計 {total} 呼叫 {calls} {source}",
-        en: "{model} in {input} cache {cache} write {write} out {output} total {total} calls {calls} {source}",
+        zh_hans: "{model} 输入 {input} 缓存 {cache} 输出 {output} 合计 {total} 调用 {calls} {source}",
+        zh_hant: "{model} 輸入 {input} 快取 {cache} 輸出 {output} 合計 {total} 呼叫 {calls} {source}",
+        en: "{model} in {input} cache {cache} out {output} total {total} calls {calls} {source}",
     },
     CliPriceTableRow => {
         zh_hans: "{model} {provider} 输入 {input} 输出 {output} 缓存读 {cache_read} 缓存写 {cache_write} {source}",

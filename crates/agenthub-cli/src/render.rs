@@ -482,7 +482,6 @@ pub fn print_usage(report: &agenthub_core::api::usage::UsageReport) {
                 Msg::CliUsageTotalsHead,
                 input = format!("{:<10}", compact_tokens(report.totals.input)),
                 cache_read = format!("{:<10}", compact_tokens(report.totals.cache_read)),
-                cache_write = format!("{:<10}", compact_tokens(report.totals.cache_write)),
                 output = format!("{:<10}", compact_tokens(report.totals.output))
             )
         );
@@ -540,7 +539,6 @@ pub fn print_usage(report: &agenthub_core::api::usage::UsageReport) {
                     label = bucket_label(*bucket, hourly),
                     input = format!("{:<9}", compact_tokens(totals.input)),
                     cache = format!("{:<9}", compact_tokens(totals.cache_read)),
-                    write = format!("{:<9}", compact_tokens(totals.cache_write)),
                     output = format!("{:<9}", compact_tokens(totals.output)),
                     total = format!("{:<9}", compact_tokens(totals.total))
                 )
@@ -639,7 +637,6 @@ fn print_group(group: &agenthub_core::api::usage::UsageGroup) {
             model = format!("{:<26}", group.label),
             input = format!("{:<9}", compact_tokens(group.totals.input)),
             cache = format!("{:<9}", compact_tokens(group.totals.cache_read)),
-            write = format!("{:<9}", compact_tokens(group.totals.cache_write)),
             output = format!("{:<9}", compact_tokens(group.totals.output)),
             total = format!("{:<9}", compact_tokens(group.totals.total)),
             calls = format!("{:<7}", group.totals.calls),

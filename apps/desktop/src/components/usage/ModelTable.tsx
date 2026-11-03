@@ -71,6 +71,7 @@ export function ModelTable({
                 return (
                   <th
                     key={column.key}
+                    data-usage-col={column.key}
                     title={column.title ? t(column.title) : undefined}
                     className={clsx(
                       "px-2 py-2 font-medium text-text-dim",
